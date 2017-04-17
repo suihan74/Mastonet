@@ -202,7 +202,7 @@ namespace Mastonet
         /// </summary>
         /// <param name="accountId"></param>
         /// <returns>Returns an Account</returns>
-        public Task<Account> GetAccount(int accountId)
+        public Task<Account> GetAccount(long accountId)
         {
             return Get<Account>($"/api/v1/accounts/{accountId}");
         }
@@ -221,9 +221,9 @@ namespace Mastonet
         /// </summary>
         /// <param name="id">Account ID</param>
         /// <returns>Returns an array of Relationships of the current user to a given account</returns>
-        public Task<IEnumerable<Relationship>> GetAccountRelationships(int id)
+        public Task<IEnumerable<Relationship>> GetAccountRelationships(long id)
         {
-            return GetAccountRelationships(new int[] { id });
+            return GetAccountRelationships(new long[] { id });
         }
 
         /// <summary>
@@ -231,7 +231,7 @@ namespace Mastonet
         /// </summary>
         /// <param name="id">Account IDs</param>
         /// <returns>Returns an array of Relationships of the current user to a list of given accounts</returns>
-        public Task<IEnumerable<Relationship>> GetAccountRelationships(IEnumerable<int> ids)
+        public Task<IEnumerable<Relationship>> GetAccountRelationships(IEnumerable<long> ids)
         {
             return Get<IEnumerable<Relationship>>("/api/v1/accounts/relationships");
         }
@@ -245,7 +245,7 @@ namespace Mastonet
         /// </summary>
         /// <param name="accountId"></param>
         /// <returns>Returns the target Account</returns>
-        public Task<Account> Block(int accountId)
+        public Task<Account> Block(long accountId)
         {
             return Get<Account>($"/api/v1/accounts/{accountId}/block");
         }
@@ -255,7 +255,7 @@ namespace Mastonet
         /// </summary>
         /// <param name="accountId"></param>
         /// <returns>Returns the target Account</returns>
-        public Task<Account> Unblock(int accountId)
+        public Task<Account> Unblock(long accountId)
         {
             return Get<Account>($"/api/v1/accounts/{accountId}/unblock");
         }
@@ -278,7 +278,7 @@ namespace Mastonet
         /// </summary>
         /// <param name="statusId"></param>
         /// <returns>Returns the target Status</returns>
-        public Task<Status> Favourite(int statusId)
+        public Task<Status> Favourite(long statusId)
         {
             return Post<Status>($"/api/vi/statuses/{statusId}/favourite");
         }
@@ -288,7 +288,7 @@ namespace Mastonet
         /// </summary>
         /// <param name="statusId"></param>
         /// <returns>Returns the target Status</returns>
-        public Task<Status> Unfavourite(int statusId)
+        public Task<Status> Unfavourite(long statusId)
         {
             return Post<Status>($"/api/vi/statuses/{statusId}/unfavourite");
         }
@@ -319,7 +319,7 @@ namespace Mastonet
         /// Authorizing follow requests
         /// </summary>
         /// <param name="accountId">The id of the account to authorize</param>
-        public Task AuthorizeRequest(int accountId)
+        public Task AuthorizeRequest(long accountId)
         {
             var data = new List<KeyValuePair<string, string>>() {
                 new KeyValuePair<string, string>("id", accountId.ToString())
@@ -331,7 +331,7 @@ namespace Mastonet
         /// Rejecting follow requests
         /// </summary>
         /// <param name="accountId">The id of the account to reject</param>
-        public Task RejectRequest(int accountId)
+        public Task RejectRequest(long accountId)
         {
             var data = new List<KeyValuePair<string, string>>() {
                 new KeyValuePair<string, string>("id", accountId.ToString())
@@ -348,7 +348,7 @@ namespace Mastonet
         /// </summary>
         /// <param name="accountId"></param>
         /// <returns>Returns an array of Accounts</returns>
-        public Task<IEnumerable<Account>> GetAccountFollowers(int accountId)
+        public Task<IEnumerable<Account>> GetAccountFollowers(long accountId)
         {
             return Get<IEnumerable<Account>>($"/api/v1/accounts/{accountId}/followers");
         }
@@ -358,7 +358,7 @@ namespace Mastonet
         /// </summary>
         /// <param name="accountId"></param>
         /// <returns>Returns an array of Accounts</returns>
-        public Task<IEnumerable<Account>> GetAccountFollowing(int accountId)
+        public Task<IEnumerable<Account>> GetAccountFollowing(long accountId)
         {
             return Get<IEnumerable<Account>>($"/api/v1/accounts/{accountId}/following");
         }
@@ -381,7 +381,7 @@ namespace Mastonet
         /// </summary>
         /// <param name="accountId"></param>
         /// <returns>Returns the target Account</returns>
-        public Task<Account> Follow(int accountId)
+        public Task<Account> Follow(long accountId)
         {
             return this.Post<Account>($"/api/v1/accounts/{accountId}/follow");
         }
@@ -391,7 +391,7 @@ namespace Mastonet
         /// </summary>
         /// <param name="accountId"></param>
         /// <returns>Returns the target Account</returns>
-        public Task<Account> Unfollow(int accountId)
+        public Task<Account> Unfollow(long accountId)
         {
             return this.Post<Account>($"/api/v1/accounts/{accountId}/unfollow");
         }
@@ -435,7 +435,7 @@ namespace Mastonet
         /// </summary>
         /// <param name="accountId"></param>
         /// <returns>Returns the target Account</returns>
-        public Task<Account> Mute(int accountId)
+        public Task<Account> Mute(long accountId)
         {
             return Get<Account>($"/api/v1/accounts/{accountId}/mute");
         }
@@ -445,7 +445,7 @@ namespace Mastonet
         /// </summary>
         /// <param name="accountId"></param>
         /// <returns>Returns the target Account</returns>
-        public Task<Account> Unmute(int accountId)
+        public Task<Account> Unmute(long accountId)
         {
             return Get<Account>($"/api/v1/accounts/{accountId}/unmute");
         }
@@ -477,7 +477,7 @@ namespace Mastonet
         /// </summary>
         /// <param name="notificationId"></param>
         /// <returns>Returns the Notification</returns>
-        public Task<Notification> GetNotification(int notificationId)
+        public Task<Notification> GetNotification(long notificationId)
         {
             return Get<Notification>($"/api/v1/notifications/{notificationId}");
         }
@@ -511,7 +511,7 @@ namespace Mastonet
         /// <param name="statusIds">The IDs of statuses to report</param>
         /// <param name="comment">A comment to associate with the report</param>
         /// <returns>Returns the finished Report</returns>
-        public Task<Report> Report(int accountId, IEnumerable<int> statusIds, string comment)
+        public Task<Report> Report(long accountId, IEnumerable<long> statusIds, string comment)
         {
             var data = new List<KeyValuePair<string, string>>() {
                 new KeyValuePair<string, string>("account_id", accountId.ToString()),
@@ -581,7 +581,7 @@ namespace Mastonet
         /// <param name="onlyMedia">Only return statuses that have media attachments</param>
         /// <param name="excludeReplies">Skip statuses that reply to other statuses</param>
         /// <returns>Returns an array of Statuses</returns>
-        public Task<IEnumerable<Status>> GetAccountStatuses(int accountId, bool onlyMedia = false, bool excludeReplies = false)
+        public Task<IEnumerable<Status>> GetAccountStatuses(long accountId, bool onlyMedia = false, bool excludeReplies = false)
         {
             var url = $"/api/v1/accounts/{accountId}/statuses";
 
@@ -611,7 +611,7 @@ namespace Mastonet
         /// </summary>
         /// <param name="statusId"></param>
         /// <returns>Returns a Status</returns>
-        public Task<Status> GetStatus(int statusId)
+        public Task<Status> GetStatus(long statusId)
         {
             return Get<Status>($"/api/v1/statuses/{statusId}");
         }
@@ -621,7 +621,7 @@ namespace Mastonet
         /// </summary>
         /// <param name="statusId"></param>
         /// <returns>Returns a Context</returns>
-        public Task<Context> GetStatusContext(int statusId)
+        public Task<Context> GetStatusContext(long statusId)
         {
             return Get<Context>($"/api/v1/statuses/{statusId}/context");
         }
@@ -631,7 +631,7 @@ namespace Mastonet
         /// </summary>
         /// <param name="statusId"></param>
         /// <returns>Returns a Card</returns>
-        public Task<Card> GetStatusCard(int statusId)
+        public Task<Card> GetStatusCard(long statusId)
         {
             return Get<Card>($"/api/v1/statuses/{statusId}/card");
         }
@@ -641,7 +641,7 @@ namespace Mastonet
         /// </summary>
         /// <param name="statusId"></param>
         /// <returns>Returns an array of Accounts</returns>
-        public Task<IEnumerable<Account>> GetRebloggedBy(int statusId)
+        public Task<IEnumerable<Account>> GetRebloggedBy(long statusId)
         {
             return Get<IEnumerable<Account>>($"/api/v1/statuses/{statusId}/reblogged_by");
         }
@@ -651,7 +651,7 @@ namespace Mastonet
         /// </summary>
         /// <param name="statusId"></param>
         /// <returns>Returns an array of Accounts</returns>
-        public Task<IEnumerable<Account>> GetFavouritedBy(int statusId)
+        public Task<IEnumerable<Account>> GetFavouritedBy(long statusId)
         {
             return Get<IEnumerable<Account>>($"/api/v1/statuses/{statusId}/favourited_by");
         }
@@ -666,7 +666,7 @@ namespace Mastonet
         /// <param name="sensitive">set this to mark the media of the status as NSFW</param>
         /// <param name="spoilerText">text to be shown as a warning before the actual content</param>
         /// <returns></returns>
-        public Task<Status> PostStatus(string status, Visibility visibility, int? replyStatusId = null, IEnumerable<int> mediaIds = null, bool sensitive = false, string spoilerText = null)
+        public Task<Status> PostStatus(string status, Visibility visibility, long? replyStatusId = null, IEnumerable<long> mediaIds = null, bool sensitive = false, string spoilerText = null)
         {
             var data = new List<KeyValuePair<string, string>>() {
                 new KeyValuePair<string, string>("status", status),
@@ -699,7 +699,7 @@ namespace Mastonet
         /// Deleting a status
         /// </summary>
         /// <param name="statusId"></param>
-        public Task DeleteStatus(int statusId)
+        public Task DeleteStatus(long statusId)
         {
             return Delete($"/api/v1/statuses/{statusId}");
         }
@@ -709,7 +709,7 @@ namespace Mastonet
         /// </summary>
         /// <param name="statusId"></param>
         /// <returns>Returns the target Status</returns>
-        public Task<Status> Reblog(int statusId)
+        public Task<Status> Reblog(long statusId)
         {
             return Post<Status>($"/api/vi/statuses/{statusId}/reblog");
         }
@@ -719,7 +719,7 @@ namespace Mastonet
         /// </summary>
         /// <param name="statusId"></param>
         /// <returns>Returns the target Status</returns>
-        public Task<Status> Unreblog(int statusId)
+        public Task<Status> Unreblog(long statusId)
         {
             return Post<Status>($"/api/vi/statuses/{statusId}/unreblog");
         }
