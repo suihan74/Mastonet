@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Mastonet
 {
@@ -26,59 +27,66 @@ namespace Mastonet
         }
 
 
-        public async void Start()
+        public async Task Start()
         {
-            client = new HttpClient();
-            client.DefaultRequestHeaders.Add("Authorization", "Bearer " + accessToken);
-
-            var stream = await client.GetStreamAsync(url);
-
-            var reader = new StreamReader(stream);
-
-            string eventName = null;
-            string data = null;
-
-            while (client != null)
+            try
             {
-                var line = reader.ReadLine();
+                client = new HttpClient();
+                client.DefaultRequestHeaders.Add("Authorization", "Bearer " + accessToken);
 
+                var stream = await client.GetStreamAsync(url);
 
-                if (string.IsNullOrEmpty(line) || line.StartsWith(":"))
+                var reader = new StreamReader(stream);
+
+                string eventName = null;
+                string data = null;
+
+                while (client != null)
                 {
-                    eventName = data = null;
-                    continue;
-                }
+                    var line = reader.ReadLine();
 
-                if (line.StartsWith("event: "))
-                {
-                    eventName = line.Substring("event: ".Length).Trim();
-                }
-                else if (line.StartsWith("data: "))
-                {
-                    data = line.Substring("data: ".Length);
 
-                    switch (eventName)
+                    if (string.IsNullOrEmpty(line) || line.StartsWith(":"))
                     {
-                        case "update":
-                            var status = JsonConvert.DeserializeObject<Status>(data);
-                            OnUpdate?.Invoke(this, new StreamUpdateEventArgs() { Status = status });
-                            break;
-                        case "notification":
-                            var notification = JsonConvert.DeserializeObject<Notification>(data);
-                            OnNotification?.Invoke(this, new StreamNotificationEventArgs() { Notification = notification });
-                            break;
-                        case "delete":
-                            var statusId = int.Parse(data);
-                            OnDelete?.Invoke(this, new StreamDeleteEventArgs() { StatusId = statusId });
-                            break;
+                        eventName = data = null;
+                        continue;
+                    }
+
+                    if (line.StartsWith("event: "))
+                    {
+                        eventName = line.Substring("event: ".Length).Trim();
+                    }
+                    else if (line.StartsWith("data: "))
+                    {
+                        data = line.Substring("data: ".Length);
+
+                        switch (eventName)
+                        {
+                            case "update":
+                                var status = JsonConvert.DeserializeObject<Status>(data);
+                                OnUpdate?.Invoke(this, new StreamUpdateEventArgs() { Status = status });
+                                break;
+                            case "notification":
+                                var notification = JsonConvert.DeserializeObject<Notification>(data);
+                                OnNotification?.Invoke(this, new StreamNotificationEventArgs() { Notification = notification });
+                                break;
+                            case "delete":
+                                var statusId = int.Parse(data);
+                                OnDelete?.Invoke(this, new StreamDeleteEventArgs() { StatusId = statusId });
+                                break;
+                        }
                     }
                 }
+            }
+            catch (Exception)
+            {
+                Stop();
             }
         }
 
         public void Stop()
         {
-            client.Dispose();
+            client?.Dispose();
             client = null;
         }
     }
