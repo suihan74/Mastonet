@@ -43,7 +43,7 @@ namespace Mastonet
 
                 while (client != null)
                 {
-                    var line = reader.ReadLine();
+                    var line = await reader.ReadLineAsync();
 
 
                     if (string.IsNullOrEmpty(line) || line.StartsWith(":"))
