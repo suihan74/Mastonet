@@ -6,6 +6,9 @@ using Newtonsoft.Json;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.IO;
+using System.Threading;
+
 namespace Mastonet
 {
     public partial class MastodonClient
@@ -81,6 +84,50 @@ namespace Mastonet
             where T : class
         {
             var content = await Post(route, data);
+            return TryDeserialize<T>(content);
+        }
+
+
+        private async Task<string> PostWithMultipartFormData(string route, IEnumerable<KeyValuePair<string, object>> data = null)
+        {
+            string url = "https://" + this.Instance + route;
+
+            var client = new HttpClient();
+            var method = new HttpMethod("POST");
+            AddHttpHeader(client);
+
+            var req = new HttpRequestMessage(HttpMethod.Post, url);
+            req.RequestUri = new Uri(url);
+            req.Headers.Add("Authorization", "BEARER " + AccessToken);
+            req.Headers.ExpectContinue = false;
+
+            var content = new MultipartFormDataContent("----Boundary");
+            foreach (var element in data)
+            {
+                var valueStream = element.Value as Stream;
+                if (valueStream != null)
+                {
+                    content.Add(new StreamContent(valueStream), element.Key, "file");
+                }
+                else
+                {
+                    content.Add(new StringContent(element.Value.ToString()), element.Key);
+                }
+            }
+
+            req.Content = content;
+
+            var contentLength = req.Content.Headers.ContentLength;
+            var response = await client.SendAsync(req, HttpCompletionOption.ResponseContentRead, CancellationToken.None);
+            response.EnsureSuccessStatusCode();
+
+            return await response.Content.ReadAsStringAsync();
+        }
+
+        private async Task<T> PostWithMultipartFormData<T>(string route, IEnumerable<KeyValuePair<string, object>> data = null)
+            where T : class
+        {
+            var content = await PostWithMultipartFormData(route, data);
             return TryDeserialize<T>(content);
         }
 
@@ -559,10 +606,13 @@ namespace Mastonet
         /// </summary>
         /// <param name="file">Media to be uploaded</param>
         /// <returns>Returns an Attachment that can be used when creating a status</returns>
-        public Task<Attachment> UploadMedia(object file)
+        public Task<Attachment> UploadMedia(System.IO.Stream file)
         {
-            throw new NotImplementedException();
-
+            var response = this.PostWithMultipartFormData<Attachment>("/api/v1/media", new KeyValuePair<string, object>[]
+            {
+                new KeyValuePair<string, object>("file", file)
+            });
+            return response;
             // TODO : upload attachment
             // return this.Post<Attachment>("/api/v1/media");
         }
@@ -951,8 +1001,10 @@ namespace Mastonet
             }
             if (mediaIds != null && mediaIds.Any())
             {
-                var mediaJson = JsonConvert.SerializeObject(mediaIds);
-                data.Add(new KeyValuePair<string, string>("media_ids", mediaJson));
+                foreach (var id in mediaIds)
+                {
+                    data.Add(new KeyValuePair<string, string>("media_ids[]", id.ToString()));
+                }
             }
             if (sensitive)
             {
