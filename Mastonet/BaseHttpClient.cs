@@ -66,53 +66,35 @@ namespace Mastonet
             return await response.Content.ReadAsStringAsync();
         }
 
-        protected async Task<T> Post<T>(string route, IEnumerable<KeyValuePair<string, string>> data = null)
-            where T : class
-        {
-            var content = await Post(route, data);
-            return TryDeserialize<T>(content);
-        }
-
-        protected async Task<string> PostWithMultipartFormData(string route, IEnumerable<KeyValuePair<string, object>> data = null)
+        protected async Task<string> PostMedia(string route, IEnumerable<KeyValuePair<string, string>> data = null, IEnumerable<Tuple<string, Stream, string>> media = null)
         {
             string url = "https://" + this.Instance + route;
 
             var client = new HttpClient();
-            var method = new HttpMethod("POST");
             AddHttpHeader(client);
 
-            var req = new HttpRequestMessage(HttpMethod.Post, url);
-            req.RequestUri = new Uri(url);
-            req.Headers.Add("Authorization", "BEARER " + AuthToken.AccessToken);
-            req.Headers.ExpectContinue = false;
+            var content = new MultipartFormDataContent();
 
-            var content = new MultipartFormDataContent("----Boundary");
-            foreach (var element in data)
+            foreach (var tuple in media)
             {
-                var valueStream = element.Value as Stream;
-                if (valueStream != null)
+                content.Add(new StreamContent(tuple.Item2), tuple.Item1, tuple.Item3);
+            }
+            if (data != null)
+            {
+                foreach (var pair in data)
                 {
-                    content.Add(new StreamContent(valueStream), element.Key, "file");
-                }
-                else
-                {
-                    content.Add(new StringContent(element.Value.ToString()), element.Key);
+                    content.Add(new StringContent(pair.Value), pair.Key);
                 }
             }
 
-            req.Content = content;
-
-            var contentLength = req.Content.Headers.ContentLength;
-            var response = await client.SendAsync(req, HttpCompletionOption.ResponseContentRead, CancellationToken.None);
-            response.EnsureSuccessStatusCode();
-
+            var response = await client.PostAsync(url, content);
             return await response.Content.ReadAsStringAsync();
         }
 
-        protected async Task<T> PostWithMultipartFormData<T>(string route, IEnumerable<KeyValuePair<string, object>> data = null)
+        protected async Task<T> Post<T>(string route, IEnumerable<KeyValuePair<string, string>> data = null, IEnumerable<Tuple<string, Stream, string>> media = null)
             where T : class
         {
-            var content = await PostWithMultipartFormData(route, data);
+            var content = media == null ? await Post(route, data) : await PostMedia(route, data, media);
             return TryDeserialize<T>(content);
         }
 
@@ -140,12 +122,14 @@ namespace Mastonet
 
         private T TryDeserialize<T>(string json)
         {
-            //TODO handle error gracefully
-            //var error = JsonConvert.DeserializeObject<Error>(json);
-            //if (!string.IsNullOrEmpty(error.Description))
-            //{
-            //    throw new ServerErrorException(error);
-            //}
+            if (json[0] == '{')
+            {
+                var error = JsonConvert.DeserializeObject<Error>(json);
+                if (!string.IsNullOrEmpty(error.Description))
+                {
+                    throw new ServerErrorException(error);
+                }
+            }
 
             return JsonConvert.DeserializeObject<T>(json);
         }

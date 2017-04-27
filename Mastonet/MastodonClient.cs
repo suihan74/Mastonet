@@ -7,7 +7,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
-using System.Threading;
 
 namespace Mastonet
 {
@@ -322,7 +321,7 @@ namespace Mastonet
             var data = new List<KeyValuePair<string, string>>() {
                 new KeyValuePair<string, string>("uri", uri)
             };
-            return this.Post<Account>($"/api/v1/follows");
+            return this.Post<Account>($"/api/v1/follows", data);
         }
 
         /// <summary>
@@ -365,17 +364,16 @@ namespace Mastonet
         /// <summary>
         /// Uploading a media attachment
         /// </summary>
-        /// <param name="file">Media to be uploaded</param>
+        /// <param name="data">Media stream to be uploaded</param>
+        /// <param name="fileName">Media file name (must contains extension ex: .png, .jpg, ...)</param>
         /// <returns>Returns an Attachment that can be used when creating a status</returns>
-        public Task<Attachment> UploadMedia(System.IO.Stream file)
+        public Task<Attachment> UploadMedia(Stream data, string fileName = "file")
         {
-            var response = this.PostWithMultipartFormData<Attachment>("/api/v1/media", new KeyValuePair<string, object>[]
-            {
-                new KeyValuePair<string, object>("file", file)
-            });
-            return response;
-            // TODO : upload attachment
-            // return this.Post<Attachment>("/api/v1/media");
+            var media = new List<Tuple<string, Stream, string>>() {
+                new Tuple<string, Stream, string>("file", data, fileName),
+            };
+
+            return this.Post<Attachment>("/api/v1/media", null, media);
         }
 
         #endregion
@@ -904,7 +902,7 @@ namespace Mastonet
         /// <returns>Returns an array of Statuses, most recent ones first</returns>
         public Task<IEnumerable<Status>> GetTagTimeline(string hashtag, ArrayOptions options, bool local = false)
         {
-            string url = "/api/v1/timelines/tag" + hashtag;
+            string url = "/api/v1/timelines/tag/" + hashtag;
 
             var queryParams = "";
             if (local)

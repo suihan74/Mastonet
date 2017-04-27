@@ -29,65 +29,62 @@ namespace Mastonet
 
         public async Task Start()
         {
-            try
+            client = new HttpClient();
+            client.DefaultRequestHeaders.Add("Authorization", "Bearer " + accessToken);
+
+            var stream = await client.GetStreamAsync(url);
+
+            var reader = new StreamReader(stream);
+
+            string eventName = null;
+            string data = null;
+
+            while (client != null)
             {
-                client = new HttpClient();
-                client.DefaultRequestHeaders.Add("Authorization", "Bearer " + accessToken);
+                var line = await reader.ReadLineAsync();
 
-                var stream = await client.GetStreamAsync(url);
 
-                var reader = new StreamReader(stream);
-
-                string eventName = null;
-                string data = null;
-
-                while (client != null)
+                if (string.IsNullOrEmpty(line) || line.StartsWith(":"))
                 {
-                    var line = await reader.ReadLineAsync();
+                    eventName = data = null;
+                    continue;
+                }
 
+                if (line.StartsWith("event: "))
+                {
+                    eventName = line.Substring("event: ".Length).Trim();
+                }
+                else if (line.StartsWith("data: "))
+                {
+                    data = line.Substring("data: ".Length);
 
-                    if (string.IsNullOrEmpty(line) || line.StartsWith(":"))
+                    switch (eventName)
                     {
-                        eventName = data = null;
-                        continue;
-                    }
-
-                    if (line.StartsWith("event: "))
-                    {
-                        eventName = line.Substring("event: ".Length).Trim();
-                    }
-                    else if (line.StartsWith("data: "))
-                    {
-                        data = line.Substring("data: ".Length);
-
-                        switch (eventName)
-                        {
-                            case "update":
-                                var status = JsonConvert.DeserializeObject<Status>(data);
-                                OnUpdate?.Invoke(this, new StreamUpdateEventArgs() { Status = status });
-                                break;
-                            case "notification":
-                                var notification = JsonConvert.DeserializeObject<Notification>(data);
-                                OnNotification?.Invoke(this, new StreamNotificationEventArgs() { Notification = notification });
-                                break;
-                            case "delete":
-                                var statusId = int.Parse(data);
-                                OnDelete?.Invoke(this, new StreamDeleteEventArgs() { StatusId = statusId });
-                                break;
-                        }
+                        case "update":
+                            var status = JsonConvert.DeserializeObject<Status>(data);
+                            OnUpdate?.Invoke(this, new StreamUpdateEventArgs() { Status = status });
+                            break;
+                        case "notification":
+                            var notification = JsonConvert.DeserializeObject<Notification>(data);
+                            OnNotification?.Invoke(this, new StreamNotificationEventArgs() { Notification = notification });
+                            break;
+                        case "delete":
+                            var statusId = int.Parse(data);
+                            OnDelete?.Invoke(this, new StreamDeleteEventArgs() { StatusId = statusId });
+                            break;
                     }
                 }
             }
-            catch (Exception)
-            {
-                Stop();
-            }
+            this.Stop();
         }
 
         public void Stop()
         {
-            client?.Dispose();
-            client = null;
+            if (client != null)
+            {
+                client.Dispose();
+                client = null;
+            }
         }
     }
 }
