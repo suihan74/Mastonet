@@ -51,7 +51,8 @@ namespace Mastonet
         /// <returns>Returns an array of Relationships of the current user to a given account</returns>
         public Task<IEnumerable<Relationship>> GetAccountRelationships(long id)
         {
-            return GetAccountRelationships(new long[] { id });
+            return Get<IEnumerable<Relationship>>($"/api/v1/accounts/relationships?id={id}");
+//            return GetAccountRelationships(new long[] { id });
         }
 
         /// <summary>
