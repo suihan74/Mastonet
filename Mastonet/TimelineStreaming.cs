@@ -19,6 +19,7 @@ namespace Mastonet
         public event EventHandler<StreamUpdateEventArgs> OnUpdate;
         public event EventHandler<StreamNotificationEventArgs> OnNotification;
         public event EventHandler<StreamDeleteEventArgs> OnDelete;
+        public event EventHandler OnCompleted;
 
         internal TimelineStreaming(string url, string accessToken)
         {
@@ -39,43 +40,49 @@ namespace Mastonet
             string eventName = null;
             string data = null;
 
-            while (client != null)
+            try
             {
-                var line = await reader.ReadLineAsync();
-
-
-                if (string.IsNullOrEmpty(line) || line.StartsWith(":"))
+                while (client != null)
                 {
-                    eventName = data = null;
-                    continue;
-                }
+                    var line = await reader.ReadLineAsync();
 
-                if (line.StartsWith("event: "))
-                {
-                    eventName = line.Substring("event: ".Length).Trim();
-                }
-                else if (line.StartsWith("data: "))
-                {
-                    data = line.Substring("data: ".Length);
 
-                    switch (eventName)
+                    if (string.IsNullOrEmpty(line) || line.StartsWith(":"))
                     {
-                        case "update":
-                            var status = JsonConvert.DeserializeObject<Status>(data);
-                            OnUpdate?.Invoke(this, new StreamUpdateEventArgs() { Status = status });
-                            break;
-                        case "notification":
-                            var notification = JsonConvert.DeserializeObject<Notification>(data);
-                            OnNotification?.Invoke(this, new StreamNotificationEventArgs() { Notification = notification });
-                            break;
-                        case "delete":
-                            var statusId = long.Parse(data);
-                            OnDelete?.Invoke(this, new StreamDeleteEventArgs() { StatusId = statusId });
-                            break;
+                        eventName = data = null;
+                        continue;
+                    }
+
+                    if (line.StartsWith("event: "))
+                    {
+                        eventName = line.Substring("event: ".Length).Trim();
+                    }
+                    else if (line.StartsWith("data: "))
+                    {
+                        data = line.Substring("data: ".Length);
+
+                        switch (eventName)
+                        {
+                            case "update":
+                                var status = JsonConvert.DeserializeObject<Status>(data);
+                                OnUpdate?.Invoke(this, new StreamUpdateEventArgs() { Status = status });
+                                break;
+                            case "notification":
+                                var notification = JsonConvert.DeserializeObject<Notification>(data);
+                                OnNotification?.Invoke(this, new StreamNotificationEventArgs() { Notification = notification });
+                                break;
+                            case "delete":
+                                var statusId = long.Parse(data);
+                                OnDelete?.Invoke(this, new StreamDeleteEventArgs() { StatusId = statusId });
+                                break;
+                        }
                     }
                 }
             }
-            this.Stop();
+            catch (Exception)
+            {
+                OnCompleted?.Invoke(this, new EventArgs());
+            }
         }
 
         public void Stop()
