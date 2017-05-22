@@ -94,7 +94,7 @@ namespace Mastonet
                 data.Add(new KeyValuePair<string, string>("header", header));
             }
 
-            return Patch<Account>($"/api/v1/accounts/update_credentials", data);
+            return PatchMedia<Account>($"/api/v1/accounts/update_credentials", data);
         }
 
         #endregion

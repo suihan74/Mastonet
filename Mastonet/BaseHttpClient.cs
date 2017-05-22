@@ -98,6 +98,37 @@ namespace Mastonet
             return TryDeserialize<T>(content);
         }
 
+        protected async Task<string> PatchMedia(string route, IEnumerable<KeyValuePair<string, string>> data = null)
+        {
+            string url = "https://" + this.Instance + route;
+
+            var client = new HttpClient();
+            var method = new HttpMethod("PATCH");
+            AddHttpHeader(client);
+
+            var content = new MultipartFormDataContent();
+
+            if (data != null)
+            {
+                foreach (var pair in data)
+                {
+                    content.Add(new StringContent(pair.Value), pair.Key);
+                }
+            }
+
+            var message = new HttpRequestMessage(method, url);
+            message.Content = content;
+            var response = await client.SendAsync(message);
+            return await response.Content.ReadAsStringAsync();
+        }
+
+        protected async Task<T> PatchMedia<T>(string route, IEnumerable<KeyValuePair<string, string>> data = null)
+            where T : class
+        {
+            var content = await PatchMedia(route, data);
+            return TryDeserialize<T>(content);
+        }
+
         protected async Task<string> Patch(string route, IEnumerable<KeyValuePair<string, string>> data = null)
         {
             string url = "https://" + this.Instance + route;
