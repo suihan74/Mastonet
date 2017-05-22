@@ -12,34 +12,36 @@ namespace Mastonet.Tests
         [Fact]
         public async Task GetAccount()
         {
-            var client = GetReadClient();
+            var client = GetTestClient();
 
             var account = await client.GetAccount(1);
 
             Assert.NotNull(account.ProfileUrl);
             Assert.NotNull(account.UserName);
+            Assert.Equal("glacasa",account.UserName);
         }
 
         [Fact]
         public async Task GetCurrentUser()
         {
-            var client = GetReadClient();
+            var client = GetTestClient();
 
             var account = await client.GetCurrentUser();
 
             Assert.NotNull(account.ProfileUrl);
             Assert.NotNull(account.UserName);
+            Assert.Equal("TestAccount", account.UserName);
         }
 
         [Fact]
         public async Task GetAccountRelationships()
         {
-            var client = GetReadClient();
+            var client = GetTestClient();
 
             var relationships = await client.GetAccountRelationships(1);
 
             Assert.NotNull(relationships);
-            Assert.NotEqual(0, relationships.Count());
+            Assert.Equal(1, relationships.Count());            
         }
     }
 }

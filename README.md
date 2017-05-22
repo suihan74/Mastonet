@@ -1,5 +1,8 @@
 # Masto.NET
 
+![Build status](https://glacasa.visualstudio.com/_apis/public/build/definitions/b2cc08b3-5c47-4294-b016-434c80d4059c/39/badge)
+[![NuGet](https://img.shields.io/nuget/v/Mastonet.svg)](https://www.nuget.org/packages/Mastonet/)
+
 Masto.NET is a .net standard library for Mastodon written in C#.
 
 ## Sample
@@ -61,7 +64,7 @@ When you have the access token, you should save it in the app, and use it every 
 
 	var client = new MastodonClient(appRegistration, auth);
 
-Now you can call all the API methods. [See Mastodon API overview](https://github.com/tootsuite/mastodon/blob/master/docs/Using-the-API/API.md)
+Now you can call all the API methods. [See Mastodon API overview](https://github.com/tootsuite/documentation/blob/master/Using-the-API/API.md)
 
 ## Streaming
 

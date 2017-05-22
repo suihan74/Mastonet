@@ -12,7 +12,7 @@ namespace Mastonet.Tests
         [Fact]
         public async Task GetAccountFollowers()
         {
-            var client = GetReadClient();
+            var client = GetTestClient();
             var accounts = await client.GetAccountFollowers(1);
 
             Assert.NotNull(accounts);
@@ -22,7 +22,7 @@ namespace Mastonet.Tests
         [Fact]
         public async Task GetAccountFollowing()
         {
-            var client = GetReadClient();
+            var client = GetTestClient();
             var accounts = await client.GetAccountFollowing(1);
 
             Assert.NotNull(accounts);
@@ -32,45 +32,96 @@ namespace Mastonet.Tests
         [Fact]
         public async Task Follow()
         {
+            var client = GetTestClient();
+            // Make sure we don't follow
+            await client.Unfollow(4);
+            await client.Unfollow(12);
+
             // Follow local
-            var client = GetFollowClient();
-            var followedAccount = await client.Follow(1);
-            Assert.NotNull(followedAccount);
+            var relation = await client.Follow(4);
+            Assert.NotNull(relation);
+            Assert.True(relation.Following);
 
             //follow remote
-            followedAccount = await client.Follow("");
-            Assert.NotNull(followedAccount);
+            // Remote tests removed to avoid send test requests to random instances
+            //var followedAccount = await client.Follow("");
+            //Assert.NotNull(followedAccount);
+            //Assert.Equal("glacasa", followedAccount.UserName);
+            //relation = (await client.GetAccountRelationships(followedAccount.Id)).First();
+            //Assert.True(relation.Following);
         }
 
         [Fact]
         public async Task Unfollow()
         {
-            var client = GetFollowClient();
-            var unfollowedAccount = await client.Unfollow(1);
-            Assert.NotNull(unfollowedAccount);
+            var client = GetTestClient();
+            // Make sure we follow
+            await client.Follow(4);
+
+            var relation = await client.Unfollow(4);
+            Assert.NotNull(relation);
+            Assert.False(relation.Following);
         }
 
 
         [Fact]
         public async Task GetFollowRequests()
         {
-            var client = GetFollowClient();
+            var client = GetPrivateClient();
             var requests = await client.GetFollowRequests();
             Assert.NotNull(requests);
+            Assert.True(requests.Any());
         }
 
         [Fact]
         public async Task AuthorizeRequest()
         {
-            var client = GetFollowClient();
-            throw new NotImplementedException();
+            var testClient = GetTestClient();
+            var privateClient = GetPrivateClient();
+                        
+            // Have the test follower
+            await privateClient.RejectRequest(3);
+            await privateClient.Unblock(3);
+            await testClient.Unfollow(11);
+            await testClient.Follow(11);
+
+            var requests = await privateClient.GetFollowRequests();
+            Assert.True(requests.Any(r => r.Id == 3));
+
+            // Authorize
+            await privateClient.AuthorizeRequest(3);
+
+            // Check if it's ok
+            requests = await privateClient.GetFollowRequests();
+            Assert.False(requests.Any(r => r.Id == 3));
+
+            var followers = await privateClient.GetAccountFollowers(11);
+            Assert.True(followers.Any(f => f.Id == 3));
         }
 
         [Fact]
         public async Task RejectRequest()
         {
-            var client = GetFollowClient();
-            throw new NotImplementedException();
+            var testClient = GetTestClient();
+            var privateClient = GetPrivateClient();
+
+            // Have the test follower
+            await privateClient.AuthorizeRequest(3);
+            await testClient.Unfollow(11);
+            await testClient.Follow(11);
+
+            var requests = await privateClient.GetFollowRequests();
+            Assert.True(requests.Any(r => r.Id == 3));
+
+            // Authorize
+            await privateClient.RejectRequest(3);
+
+            // Check if it's ok
+            requests = await privateClient.GetFollowRequests();
+            Assert.False(requests.Any(r => r.Id == 3));
+
+            var followers = await privateClient.GetAccountFollowers(11);
+            Assert.False(followers.Any(f => f.Id == 3));
         }
     }
 }
