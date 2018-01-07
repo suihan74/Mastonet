@@ -19,7 +19,7 @@ namespace Mastonet.Entities
         [JsonProperty("client_secret")]
         public string ClientSecret { get; set; }
 
-        [JsonIgnore]
+        [JsonProperty("instance")]
         public string Instance { get; set; }
 
         [JsonIgnore]
