@@ -11,7 +11,7 @@ namespace Mastonet
 
         public long? SinceId { get; set; }
 
-        public long? Limit { get; set; }
+        public int? Limit { get; set; }
 
         internal string ToQueryString()
         {
