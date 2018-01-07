@@ -8,6 +8,12 @@ namespace Mastonet.Entities
     public class Relationship
     {
         /// <summary>
+        /// Target account id
+        /// </summary>
+        [JsonProperty("id")]
+        public long Id { get; set; }
+        
+        /// <summary>
         /// Whether the user is currently following the account
         /// </summary>
         [JsonProperty("following")]
@@ -36,5 +42,11 @@ namespace Mastonet.Entities
         /// </summary>
         [JsonProperty("requested")]
         public bool Requested { get; set; }
+
+        /// <summary>
+        /// Whether the user is currently blocking the accounts's domain
+        /// </summary>
+        [JsonProperty("domain_blocking")]
+        public bool DomainBlocking { get; set; }
     }
 }
