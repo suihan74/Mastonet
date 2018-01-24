@@ -62,6 +62,12 @@ namespace Mastonet.Entities
         public DateTime CreatedAt { get; set; }
 
         /// <summary>
+        /// An array of Emoji
+        /// </summary>
+        [JsonProperty("emojis")]
+        public IEnumerable<Emoji> Emojis { get; set; }
+
+        /// <summary>
         /// The number of reblogs for the status
         /// </summary>
         [JsonProperty("reblogs_count")]
