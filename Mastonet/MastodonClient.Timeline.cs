@@ -127,6 +127,51 @@ namespace Mastonet
         }
 
 
+        /// <summary>
+        /// Retrieving List timeline
+        /// </summary>
+        /// <param name="listId">The id of a list to retieve</param>
+        /// <param name="local">Only return statuses originating from this instance</param>
+        /// <param name="maxId">Get items with ID less than or equal this value</param>
+        /// <param name="sinceId">Get items with ID greater than this value</param>
+        /// <param name="limit ">Maximum number of items to get (Default 40, Max 80)</param>
+        /// <returns>Returns an array of Statuses, most recent ones first</returns>
+        public Task<MastodonList<Status>> GetListTimeline(long listId, long? maxId = null, long? sinceId = null, int? limit = null, bool local = false)
+        {
+            return GetListTimeline(listId, new ArrayOptions() { MaxId = maxId, SinceId = sinceId, Limit = limit }, local);
+        }
+
+        /// <summary>
+        /// Retrieving List timeline
+        /// </summary>
+        /// <param name="listId">The id of a list to retrieve</param>
+        /// <param name="options">Define the first and last items to get</param>
+        /// <param name="local">Only return statuses originating from this instance</param>
+        /// <returns>Returns an array of Statuses, most recent ones first</returns>
+        public Task<MastodonList<Status>> GetListTimeline(long listId, ArrayOptions options, bool local)
+        {
+            string url = "/api/v1/timelines/list/" + listId;
+
+            var queryParams = "";
+            if (local)
+            {
+                queryParams += "?local=true";
+            }
+            if (options != null)
+            {
+                if (queryParams != "")
+                {
+                    queryParams += "&";
+                }
+                else
+                {
+                    queryParams += "?";
+                }
+                queryParams += options.ToQueryString();
+            }
+
+            return GetList<Status>(url + queryParams);
+        }
 
         #region Streaming
 
