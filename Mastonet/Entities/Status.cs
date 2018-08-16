@@ -145,5 +145,11 @@ namespace Mastonet.Entities
         [JsonProperty("language")]
         public string Language { get; set; }
 
+        /// <summary>
+        /// Whether this is the pinned status for the account that posted it
+        /// </summary>
+        [JsonProperty("pinned")]
+        public bool? Pinned { get; set; }
+
     }
 }

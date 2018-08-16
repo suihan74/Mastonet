@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 
 namespace Mastonet.Entities
 {
@@ -94,5 +95,41 @@ namespace Mastonet.Entities
         /// </summary>
         [JsonProperty("header_static")]
         public string StaticHeaderUrl { get; set; }
+
+        /// <summary>
+        /// Array of Emoji in account username and note
+        /// </summary>
+        [JsonProperty("emojis")]
+        public IEnumerable<Emoji> Emojis { get; set; }
+
+        /// <summary>
+        /// If the owner decided to switch accounts, new account is in this attribute
+        /// </summary>
+        [JsonProperty("moved")]
+        public Account Moved { get; set; }
+
+        /// <summary>
+        /// Array of profile metadata field, each element has 'name' and 'value'
+        /// </summary>
+        [JsonProperty("fields")]
+        public IEnumerable<Field> Fields { get; set; }
+
+        /// <summary>
+        /// Boolean to indicate that the account performs automated actions
+        /// </summary>
+        [JsonProperty("bot")]
+        public bool? Bot { get; set; }
+    }
+
+    /// <summary>
+    /// profile metadata field
+    /// </summary>
+    public class Field
+    {
+        [JsonProperty("name")]
+        string Name { get; set; }
+
+        [JsonProperty("value")]
+        string Value { get; set; }
     }
 }

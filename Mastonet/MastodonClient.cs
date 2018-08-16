@@ -28,7 +28,16 @@ namespace Mastonet
         /// <returns>Returns the current Instance. Does not require authentication</returns>
         public Task<Instance> GetInstance()
         {
-            return this.Get<Instance>("/api/v1/instance");
+            return Get<Instance>("/api/v1/instance");
+        }
+
+        /// <summary>
+        /// Getting current instance's custom emojis
+        /// </summary>
+        /// <returns>Returns a list of Emoji</returns>
+        public Task<MastodonList<Emoji>> GetCustomEmojis()
+        {
+            return GetList<Emoji>("/api/v1/custom_emojis");
         }
 
         #endregion

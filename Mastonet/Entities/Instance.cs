@@ -30,5 +30,29 @@ namespace Mastonet.Entities
         /// </summary>
         [JsonProperty("email")]
         public string Email { get; set; }
+
+        /// <summary>
+        /// The Mastodon version used by instance.
+        /// </summary>
+        [JsonProperty("version")]
+        public string Version { get; set; }
+
+        /// <summary>
+        /// streaming_api
+        /// </summary>
+        [JsonProperty("urls")]
+        public Dictionary<string, string> Urls { get; set; }
+
+        /// <summary>
+        /// Array of ISO 6391 language codes the instance has chosen to advertise
+        /// </summary>
+        [JsonProperty("languages")]
+        public IEnumerable<string> Languages { get; set; }
+
+        /// <summary>
+        /// Account of the admin or another contact person
+        /// </summary>
+        [JsonProperty("contact_account")]
+        public Account ContactAccount { get; set; }
     }
 }
