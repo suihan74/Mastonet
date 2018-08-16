@@ -236,6 +236,51 @@ namespace Mastonet
             return JsonConvert.DeserializeObject<T>(json);
         }
 
+
+        protected async Task<string> Put(string route, IEnumerable<KeyValuePair<string, string>> data = null)
+        {
+            string url = "https://" + this.Instance + route;
+
+            var client = new HttpClient();
+            AddHttpHeader(client);
+
+            var content = new FormUrlEncodedContent(data ?? Enumerable.Empty<KeyValuePair<string, string>>());
+            var response = await client.PutAsync(url, content);
+            return await response.Content.ReadAsStringAsync();
+        }
+
+        protected async Task<string> PutMedia(string route, IEnumerable<KeyValuePair<string, string>> data = null, IEnumerable<MediaDefinition> media = null)
+        {
+            string url = "https://" + this.Instance + route;
+
+            var client = new HttpClient();
+            AddHttpHeader(client);
+
+            var content = new MultipartFormDataContent();
+
+            foreach (var m in media)
+            {
+                content.Add(new StreamContent(m.Media), m.ParamName, m.FileName);
+            }
+            if (data != null)
+            {
+                foreach (var pair in data)
+                {
+                    content.Add(new StringContent(pair.Value), pair.Key);
+                }
+            }
+
+            var response = await client.PutAsync(url, content);
+            return await response.Content.ReadAsStringAsync();
+        }
+
+        protected async Task<T> Put<T>(string route, IEnumerable<KeyValuePair<string, string>> data = null, IEnumerable<MediaDefinition> media = null)
+            where T : class
+        {
+            var content = media != null && media.Any() ? await PostMedia(route, data, media) : await Post(route, data);
+            return TryDeserialize<T>(content);
+        }
+
         #endregion
     }
 }
